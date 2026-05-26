@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Painel de Desempenho — EEEFM ANTONIO DOS SANTOS NEVES</title>
+<style>
+:root{--bg:#f0f4f8;--card:#fff;--header:#1e3a5f;--accent:#2980b9;--border:#d1dce8;--text:#2c3e50;--muted:#7f8c8d}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+.topbar{background:var(--header);color:#fff;padding:14px 22px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.topbar h1{font-size:16px;font-weight:700;line-height:1.3}
+.topbar small{font-size:11px;opacity:.7}
+.filters{background:var(--card);padding:14px 22px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;border-bottom:2px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 6px rgba(0,0,0,.07)}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fg label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+select{border:1.5px solid var(--border);border-radius:6px;padding:6px 10px;font-size:13px;color:var(--text);background:#fff;cursor:pointer;min-width:150px}
+select:focus{outline:none;border-color:var(--accent)}
+.summary{display:flex;gap:10px;padding:14px 22px;flex-wrap:wrap}
+.card{background:var(--card);border-radius:10px;padding:12px 16px;flex:1;min-width:110px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-left:4px solid var(--accent)}
+.card.warn{border-left-color:#e74c3c}.card.ok{border-left-color:#27ae60}.card.mid{border-left-color:#e67e22}
+.card-val{font-size:24px;font-weight:800;color:var(--header)}
+.card-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+.main{padding:0 22px 30px}
+.tabs{display:flex;gap:3px;padding:14px 0 0}
+.tab{padding:7px 16px;border-radius:8px 8px 0 0;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);border-bottom:none;background:#e8edf2;color:var(--muted);transition:all .15s}
+.tab.active{background:var(--card);color:var(--header)}
+.table-wrap{background:var(--card);border-radius:0 10px 10px 10px;border:1.5px solid var(--border);overflow:auto;max-height:68vh}
+.legend{display:flex;gap:10px;align-items:center;padding:8px 0 4px;flex-wrap:wrap;font-size:11px;color:var(--muted)}
+.ldot{width:13px;height:13px;border-radius:3px;display:inline-block;vertical-align:middle;margin-right:3px}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th{background:var(--header);color:#fff;padding:9px 11px;text-align:center;position:sticky;top:0;z-index:10;white-space:nowrap;font-size:11px;border-right:1px solid rgba(255,255,255,.15)}
+th.left{text-align:left;min-width:150px;position:sticky;left:0;z-index:20}
+td{padding:8px 9px;text-align:center;border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-size:12px;font-weight:600}
+td.left{text-align:left;font-weight:700;font-size:13px;position:sticky;left:0;background:#fff;z-index:5;border-right:2px solid var(--border);white-space:nowrap}
+tr:hover td{filter:brightness(.96)}
+tr:hover td.left{background:#f5f8fb}
+.bar-outer{background:#eaecef;border-radius:4px;height:18px;overflow:hidden;position:relative;min-width:110px}
+.bar-inner{height:100%;border-radius:4px}
+.bar-label{position:absolute;right:5px;top:1px;font-size:11px;font-weight:700;color:#2c3e50}
+.ranking{padding:0}
+.rrow{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border);transition:background .1s}
+.rrow:hover{background:#f5f8fb}
+.rnum{font-size:17px;font-weight:900;color:var(--border);min-width:30px;text-align:right}
+.rnum.top{color:#d68910}
+.rinfo{flex:1}.rturma{font-size:14px;font-weight:700}.rsub{font-size:11px;color:var(--muted)}
+.rbar{flex:2}.rpct{font-size:18px;font-weight:900;min-width:48px;text-align:right}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:9px;padding:14px}
+.dcard{border-radius:8px;padding:11px 13px;background:#f8fafc;border:1.5px solid var(--border)}
+.dcode{font-size:13px;font-weight:800;color:var(--header)}
+.dbars{margin-top:7px;display:flex;flex-direction:column;gap:4px}
+.drow{display:flex;align-items:center;gap:5px;font-size:11px}
+.dname{min-width:95px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dtrack{flex:1;height:11px;background:#e8edf2;border-radius:3px;overflow:hidden}
+.dfill{height:100%;border-radius:3px}
+.dval{min-width:28px;text-align:right;font-weight:700}
+.empty{padding:60px;text-align:center;color:var(--muted);font-size:15px}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span style="font-size:26px">📊</span>
+  <div><h1>Painel de Desempenho por Turma — Avaliação Diagnóstica 2026</h1>
+  <small>EEEFM ANTONIO DOS SANTOS NEVES · 25/05/2026</small></div>
+</div>
+
+<div class="filters">
+  <div class="fg"><label>Série / Ano</label><select id="fano"><option value="">Todas as séries</option></select></div>
+  <div class="fg"><label>Disciplina</label><select id="fcomp"><option value="">Todas as disciplinas</option></select></div>
+  <div class="fg"><label>Situação</label>
+    <select id="ffiltro">
+      <option value="all">Todas as turmas</option>
+      <option value="below60">⚠️ Abaixo de 60%</option>
+      <option value="above60">✅ 60% ou acima</option>
+    </select>
+  </div>
+  <div class="fg"><label>Ordenar por</label>
+    <select id="fsort">
+      <option value="turma">Nome da turma</option>
+      <option value="asc">% Médio ↑ menor primeiro</option>
+      <option value="desc">% Médio ↓ maior primeiro</option>
+    </select>
+  </div>
+</div>
+
+<div class="summary" id="summ"></div>
+
+<div class="main">
+  <div class="tabs">
+    <div class="tab active" data-v="heatmap">🌡️ Mapa de Calor</div>
+    <div class="tab" data-v="ranking">🏆 Ranking</div>
+    <div class="tab" data-v="desc">🔍 Por Descritor</div>
+  </div>
+  <div class="legend">
+    <strong style="color:var(--text)">Legenda:</strong>
+    <span><span class="ldot" style="background:#f9b8b0"></span>&lt;40% Muito Baixo</span>
+    <span><span class="ldot" style="background:#fce3b4"></span>40–59% Baixo</span>
+    <span><span class="ldot" style="background:#c5e8cd"></span>60–74% Médio</span>
+    <span><span class="ldot" style="background:#8dd4a8"></span>≥75% Alto</span>
+    <span><span class="ldot" style="background:#e0e0e0;border:1px dashed #bbb"></span>Sem dado</span>
+  </div>
+  <div class="table-wrap">
+    <div id="vheat"></div>
+    <div id="vrank" class="hidden"></div>
+    <div id="vdesc" class="hidden"></div>
+  </div>
+</div>
+
+<script>
+const DATA=[{"ano":"6º ANO","comp":"CN","turma":"6ºIM01-EF","pct_medio":44,"avaliados":"27","previstos":"30","descritores":{"D064_CN":52,"D102_CN":22,"D168_CN":0,"D171_CN":89,"D188_CN":58}},{"ano":"6º ANO","comp":"CN","turma":"6ºIM02-EF","pct_medio":40,"avaliados":"29","previstos":"29","descritores":{"D064_CN":45,"D102_CN":24,"D168_CN":0,"D171_CN":82,"D188_CN":52}},{"ano":"6º ANO","comp":"CN","turma":"6ºIM03-EF","pct_medio":43,"avaliados":"29","previstos":"33","descritores":{"D064_CN":48,"D102_CN":31,"D168_CN":10,"D171_CN":72,"D188_CN":55}},{"ano":"6º ANO","comp":"GEO","turma":"6ºIM01-EF","pct_medio":85,"avaliados":"27","previstos":"30","descritores":{"D068_G":93,"D079_G":89,"D087_G":67,"D255_G":93}},{"ano":"6º ANO","comp":"GEO","turma":"6ºIM02-EF","pct_medio":73,"avaliados":"29","previstos":"29","descritores":{"D068_G":79,"D079_G":66,"D087_G":72,"D255_G":76}},{"ano":"6º ANO","comp":"GEO","turma":"6ºIM03-EF","pct_medio":72,"avaliados":"29","previstos":"33","descritores":{"D068_G":76,"D079_G":72,"D087_G":55,"D255_G":83}},{"ano":"6º ANO","comp":"HIS","turma":"6ºIM01-EF","pct_medio":85,"avaliados":"27","previstos":"30","descritores":{"D065_H":93,"D072_H":81,"D228_H":81,"D229_H":85}},{"ano":"6º ANO","comp":"HIS","turma":"6ºIM02-EF","pct_medio":75,"avaliados":"29","previstos":"29","descritores":{"D065_H":86,"D072_H":69,"D228_H":59,"D229_H":86}},{"ano":"6º ANO","comp":"HIS","turma":"6ºIM03-EF","pct_medio":66,"avaliados":"29","previstos":"33","descritores":{"D065_H":72,"D072_H":62,"D228_H":48,"D229_H":79}},{"ano":"6º ANO","comp":"LP","turma":"6ºIM01-EF","pct_medio":59,"avaliados":"27","previstos":"30","descritores":{"D016_P":81,"D017_P":37,"D028_P":15,"D030_P":41,"D037_P":96,"D102_P":85}},{"ano":"6º ANO","comp":"LP","turma":"6ºIM02-EF","pct_medio":49,"avaliados":"29","previstos":"29","descritores":{"D016_P":72,"D017_P":38,"D028_P":0,"D030_P":34,"D037_P":86,"D102_P":62}},{"ano":"6º ANO","comp":"LP","turma":"6ºIM03-EF","pct_medio":43,"avaliados":"29","previstos":"33","descritores":{"D016_P":55,"D017_P":38,"D028_P":21,"D030_P":31,"D037_P":66,"D102_P":48}},{"ano":"6º ANO","comp":"MT","turma":"6ºIM01-EF","pct_medio":65,"avaliados":"27","previstos":"30","descritores":{"D001_M":74,"D011_M":52,"D012_M":56,"D014_M":100,"D115_M":74,"D116_M":33}},{"ano":"6º ANO","comp":"MT","turma":"6ºIM02-EF","pct_medio":53,"avaliados":"29","previstos":"29","descritores":{"D001_M":55,"D011_M":45,"D012_M":28,"D014_M":100,"D115_M":59,"D116_M":34}},{"ano":"6º ANO","comp":"MT","turma":"6ºIM03-EF","pct_medio":46,"avaliados":"29","previstos":"33","descritores":{"D001_M":55,"D011_M":41,"D012_M":24,"D014_M":86,"D115_M":48,"D116_M":21}},{"ano":"7º ANO","comp":"CN","turma":"7ºIM01-EF","pct_medio":36,"avaliados":"29","previstos":"31","descritores":{"D002_CN":21,"D044_CN":28,"D156_CN":45,"D157_CN":76,"D190_CN":41,"D65_CN":7}},{"ano":"7º ANO","comp":"CN","turma":"7ºIM02-EF","pct_medio":31,"avaliados":"27","previstos":"29","descritores":{"D002_CN":26,"D044_CN":37,"D156_CN":33,"D157_CN":48,"D190_CN":37,"D65_CN":7}},{"ano":"7º ANO","comp":"CN","turma":"7ºIM03-EF","pct_medio":32,"avaliados":"29","previstos":"30","descritores":{"D002_CN":17,"D044_CN":28,"D156_CN":31,"D157_CN":62,"D190_CN":41,"D65_CN":14}},{"ano":"7º ANO","comp":"GEO","turma":"7ºIM01-EF","pct_medio":66,"avaliados":"29","previstos":"31","descritores":{"D006_G":76,"D076_G":66,"D099_G":62,"D168_G":31,"D227_G":83,"D255_G":76}},{"ano":"7º ANO","comp":"GEO","turma":"7ºIM02-EF","pct_medio":57,"avaliados":"27","previstos":"29","descritores":{"D006_G":70,"D076_G":33,"D099_G":59,"D168_G":44,"D227_G":74,"D255_G":63}},{"ano":"7º ANO","comp":"GEO","turma":"7ºIM03-EF","pct_medio":63,"avaliados":"29","previstos":"30","descritores":{"D006_G":79,"D076_G":62,"D099_G":52,"D168_G":45,"D227_G":71,"D255_G":72}},{"ano":"7º ANO","comp":"HIS","turma":"7ºIM01-EF","pct_medio":50,"avaliados":"29","previstos":"31","descritores":{"D169_H":76,"D228_H":17,"D232_H":52,"D233_H":76,"D237_H":38,"D238_H":41}},{"ano":"7º ANO","comp":"HIS","turma":"7ºIM02-EF","pct_medio":40,"avaliados":"27","previstos":"29","descritores":{"D169_H":56,"D228_H":15,"D232_H":37,"D233_H":52,"D237_H":44,"D238_H":37}},{"ano":"7º ANO","comp":"HIS","turma":"7ºIM03-EF","pct_medio":47,"avaliados":"29","previstos":"30","descritores":{"D169_H":52,"D228_H":17,"D232_H":52,"D233_H":72,"D237_H":41,"D238_H":45}},{"ano":"7º ANO","comp":"LP","turma":"7ºIM01-EF","pct_medio":55,"avaliados":"29","previstos":"31","descritores":{"D016_P":72,"D019_P":59,"D023_P":45,"D037_P":69,"D039_P":34,"D043_P":48}},{"ano":"7º ANO","comp":"LP","turma":"7ºIM02-EF","pct_medio":43,"avaliados":"27","previstos":"29","descritores":{"D016_P":67,"D019_P":44,"D023_P":30,"D037_P":56,"D039_P":26,"D043_P":37}},{"ano":"7º ANO","comp":"LP","turma":"7ºIM03-EF","pct_medio":44,"avaliados":"29","previstos":"30","descritores":{"D016_P":52,"D019_P":48,"D023_P":41,"D037_P":48,"D039_P":38,"D043_P":34}},{"ano":"7º ANO","comp":"MT","turma":"7ºIM01-EF","pct_medio":67,"avaliados":"29","previstos":"31","descritores":{"D002_M":90,"D011_M":59,"D024_M":76,"D064_M":66,"D113_M":55,"D115_M":59}},{"ano":"7º ANO","comp":"MT","turma":"7ºIM02-EF","pct_medio":46,"avaliados":"27","previstos":"29","descritores":{"D002_M":81,"D011_M":41,"D024_M":48,"D064_M":70,"D113_M":19,"D115_M":19}},{"ano":"7º ANO","comp":"MT","turma":"7ºIM03-EF","pct_medio":57,"avaliados":"29","previstos":"30","descritores":{"D002_M":93,"D011_M":62,"D024_M":69,"D064_M":62,"D113_M":24,"D115_M":34}},{"ano":"8º ANO","comp":"CN","turma":"8ºIM01-EF","pct_medio":44,"avaliados":"34","previstos":"35","descritores":{"D012_CN":71,"D040_B":21,"D051_CN":35,"D064_CN":79,"D155_CN":6,"D184_CN":50}},{"ano":"8º ANO","comp":"CN","turma":"8ºIM02-EF","pct_medio":50,"avaliados":"34","previstos":"35","descritores":{"D012_CN":56,"D040_B":21,"D051_CN":53,"D064_CN":71,"D155_CN":41,"D184_CN":59}},{"ano":"8º ANO","comp":"GEO","turma":"8ºIM01-EF","pct_medio":66,"avaliados":"34","previstos":"35","descritores":{"D024_G":53,"D027_G":53,"D029_G":88,"D109_G":85,"D114_G":53,"D117_G":65}},{"ano":"8º ANO","comp":"GEO","turma":"8ºIM02-EF","pct_medio":62,"avaliados":"34","previstos":"35","descritores":{"D024_G":50,"D027_G":56,"D029_G":79,"D109_G":65,"D114_G":62,"D117_G":59}},{"ano":"8º ANO","comp":"HIS","turma":"8ºIM01-EF","pct_medio":53,"avaliados":"34","previstos":"35","descritores":{"D017_H":79,"D031_H":56,"D092_H":38,"D237_H":53,"D240_H":62,"D241_H":32}},{"ano":"8º ANO","comp":"HIS","turma":"8ºIM02-EF","pct_medio":55,"avaliados":"34","previstos":"35","descritores":{"D017_H":71,"D031_H":65,"D092_H":47,"D237_H":56,"D240_H":62,"D241_H":32}},{"ano":"8º ANO","comp":"LP","turma":"8ºIM01-EF","pct_medio":51,"avaliados":"34","previstos":"35","descritores":{"D017_P":79,"D025_P":41,"D032_P":41,"D038_P":29,"D057_P":91,"D102_P":26}},{"ano":"8º ANO","comp":"LP","turma":"8ºIM02-EF","pct_medio":52,"avaliados":"34","previstos":"35","descritores":{"D017_P":82,"D025_P":56,"D032_P":53,"D038_P":29,"D057_P":79,"D102_P":15}},{"ano":"8º ANO","comp":"MT","turma":"8ºIM01-EF","pct_medio":53,"avaliados":"34","previstos":"35","descritores":{"D018_M":44,"D038_M":65,"D042_M":38,"D058_M":38,"D063_M":97,"D122_M":38}},{"ano":"8º ANO","comp":"MT","turma":"8ºIM02-EF","pct_medio":56,"avaliados":"34","previstos":"35","descritores":{"D018_M":41,"D038_M":76,"D042_M":44,"D058_M":32,"D063_M":97,"D122_M":44}},{"ano":"9º ANO","comp":"CN","turma":"9ºIM01-EF","pct_medio":60,"avaliados":"34","previstos":"35","descritores":{"D063_CN":44,"D103_CN":53,"D109_CN":47,"D158_CN":59,"D160_CN":79,"D169_CN":79}},{"ano":"9º ANO","comp":"CN","turma":"9ºIM02-EF","pct_medio":33,"avaliados":"22","previstos":"24","descritores":{"D063_CN":14,"D103_CN":27,"D109_CN":32,"D158_CN":18,"D160_CN":55,"D169_CN":55}},{"ano":"9º ANO","comp":"CN","turma":"9ºIM03-EF","pct_medio":49,"avaliados":"24","previstos":"25","descritores":{"D063_CN":29,"D103_CN":42,"D109_CN":50,"D158_CN":21,"D160_CN":71,"D169_CN":83}},{"ano":"9º ANO","comp":"GEO","turma":"9ºIM01-EF","pct_medio":61,"avaliados":"34","previstos":"35","descritores":{"D015_G":76,"D016_G":85,"D024_G":29,"D026_G":32,"D119_G":68,"D130_G":76}},{"ano":"9º ANO","comp":"GEO","turma":"9ºIM02-EF","pct_medio":48,"avaliados":"22","previstos":"24","descritores":{"D015_G":59,"D016_G":68,"D024_G":18,"D026_G":36,"D119_G":55,"D130_G":55}},{"ano":"9º ANO","comp":"GEO","turma":"9ºIM03-EF","pct_medio":48,"avaliados":"24","previstos":"25","descritores":{"D015_G":54,"D016_G":71,"D024_G":33,"D026_G":21,"D119_G":58,"D130_G":50}},{"ano":"9º ANO","comp":"HIS","turma":"9ºIM01-EF","pct_medio":35,"avaliados":"34","previstos":"35","descritores":{"D236_H":24,"D237_H":31,"D238_H":32,"D240_H":26,"D251_H":65}},{"ano":"9º ANO","comp":"HIS","turma":"9ºIM02-EF","pct_medio":23,"avaliados":"22","previstos":"24","descritores":{"D236_H":27,"D237_H":18,"D238_H":18,"D240_H":27,"D251_H":32}},{"ano":"9º ANO","comp":"HIS","turma":"9ºIM03-EF","pct_medio":25,"avaliados":"24","previstos":"25","descritores":{"D236_H":21,"D237_H":23,"D238_H":25,"D240_H":13,"D251_H":46}},{"ano":"9º ANO","comp":"LP","turma":"9ºIM01-EF","pct_medio":73,"avaliados":"34","previstos":"35","descritores":{"D017_P":79,"D022_P":82,"D037_P":97,"D055_P":79,"D060_P":65,"D102_P":36}},{"ano":"9º ANO","comp":"LP","turma":"9ºIM02-EF","pct_medio":50,"avaliados":"22","previstos":"24","descritores":{"D017_P":73,"D022_P":41,"D037_P":82,"D055_P":45,"D060_P":27,"D102_P":32}},{"ano":"9º ANO","comp":"LP","turma":"9ºIM03-EF","pct_medio":58,"avaliados":"24","previstos":"25","descritores":{"D017_P":71,"D022_P":63,"D037_P":96,"D055_P":50,"D060_P":50,"D102_P":17}},{"ano":"9º ANO","comp":"MT","turma":"9ºIM01-EF","pct_medio":58,"avaliados":"34","previstos":"35","descritores":{"D009_M":74,"D030_M":26,"D038_M":53,"D039_M":42,"D058_M":62,"D063_M":91}},{"ano":"9º ANO","comp":"MT","turma":"9ºIM02-EF","pct_medio":44,"avaliados":"22","previstos":"24","descritores":{"D009_M":23,"D030_M":27,"D038_M":50,"D039_M":27,"D058_M":45,"D063_M":91}},{"ano":"9º ANO","comp":"MT","turma":"9ºIM03-EF","pct_medio":42,"avaliados":"24","previstos":"25","descritores":{"D009_M":50,"D030_M":17,"D038_M":42,"D039_M":38,"D058_M":4,"D063_M":100}},{"ano":"1ª SÉRIE","comp":"FIS","turma":"1ªIM01-EM-MCN","pct_medio":50,"avaliados":"33","previstos":"35","descritores":{"D044_CN":33,"D045_CN":55,"D054_CN":70,"D056_CN":42}},{"ano":"1ª SÉRIE","comp":"FIS","turma":"1ªV01-EM-MCN","pct_medio":47,"avaliados":"17","previstos":"18","descritores":{"D044_CN":29,"D045_CN":47,"D054_CN":59,"D056_CN":53}},{"ano":"1ª SÉRIE","comp":"FIS","turma":"1ªV02-EM-MCN","pct_medio":27,"avaliados":"16","previstos":"18","descritores":{"D044_CN":19,"D045_CN":19,"D054_CN":56,"D056_CN":13}},{"ano":"1ª SÉRIE","comp":"GEO","turma":"1ªIM01-EM-MCN","pct_medio":27,"avaliados":"33","previstos":"35","descritores":{"D006_G":33,"D027_G":24,"D052_G":24,"D062_G":24}},{"ano":"1ª SÉRIE","comp":"GEO","turma":"1ªV01-EM-MCN","pct_medio":25,"avaliados":"17","previstos":"18","descritores":{"D006_G":18,"D027_G":35,"D052_G":35,"D062_G":12}},{"ano":"1ª SÉRIE","comp":"GEO","turma":"1ªV02-EM-MCN","pct_medio":31,"avaliados":"16","previstos":"18","descritores":{"D006_G":31,"D027_G":19,"D052_G":31,"D062_G":44}},{"ano":"1ª SÉRIE","comp":"HIS","turma":"1ªIM01-EM-MCN","pct_medio":33,"avaliados":"33","previstos":"35","descritores":{"D001_H":61,"D058_H":30,"D245_H":21,"D246_H":21}},{"ano":"1ª SÉRIE","comp":"HIS","turma":"1ªV01-EM-MCN","pct_medio":34,"avaliados":"17","previstos":"18","descritores":{"D001_H":65,"D058_H":35,"D245_H":18,"D246_H":18}},{"ano":"1ª SÉRIE","comp":"HIS","turma":"1ªV02-EM-MCN","pct_medio":39,"avaliados":"16","previstos":"18","descritores":{"D001_H":56,"D058_H":56,"D245_H":13,"D246_H":31}},{"ano":"1ª SÉRIE","comp":"LP","turma":"1ªIM01-EM-MCN","pct_medio":56,"avaliados":"33","previstos":"35","descritores":{"D022_P":55,"D037_P":58,"D038_P":60,"D043_P":51,"D057_P":55}},{"ano":"1ª SÉRIE","comp":"LP","turma":"1ªIM01-EMI-IPI","pct_medio":76,"avaliados":"35","previstos":"35","descritores":{"D022_P":72,"D037_P":71,"D038_P":86,"D043_P":66,"D057_P":87}},{"ano":"1ª SÉRIE","comp":"LP","turma":"1ªV01-EM-MCN","pct_medio":47,"avaliados":"17","previstos":"19","descritores":{"D022_P":51,"D037_P":47,"D038_P":40,"D043_P":57,"D057_P":39}},{"ano":"1ª SÉRIE","comp":"LP","turma":"1ªV02-EM-MCN","pct_medio":54,"avaliados":"14","previstos":"16","descritores":{"D022_P":64,"D037_P":46,"D038_P":44,"D043_P":68,"D057_P":47}},{"ano":"1ª SÉRIE","comp":"MT","turma":"1ªIM01-EM-MCN","pct_medio":28,"avaliados":"32","previstos":"35","descritores":{"D009_M":31,"D018_M":26,"D037_M":27}},{"ano":"1ª SÉRIE","comp":"MT","turma":"1ªIM01-EMI-IPI","pct_medio":55,"avaliados":"35","previstos":"35","descritores":{"D009_M":58,"D018_M":59,"D037_M":49}},{"ano":"1ª SÉRIE","comp":"MT","turma":"1ªV01-EM-MCN","pct_medio":32,"avaliados":"15","previstos":"19","descritores":{"D009_M":33,"D018_M":32,"D037_M":31}},{"ano":"1ª SÉRIE","comp":"MT","turma":"1ªV02-EM-MCN","pct_medio":31,"avaliados":"13","previstos":"16","descritores":{"D009_M":46,"D018_M":28,"D037_M":25}},{"ano":"1ª SÉRIE","comp":"QUI","turma":"1ªIM01-EM-MCN","pct_medio":39,"avaliados":"33","previstos":"35","descritores":{"D102_CN":39,"D104_CN":67,"D107_CN":30,"D109_CN":18}},{"ano":"1ª SÉRIE","comp":"QUI","turma":"1ªIM01-EMI-IPI","pct_medio":59,"avaliados":"35","previstos":"35","descritores":{"D102_CN":60,"D104_CN":91,"D107_CN":49,"D109_CN":34}},{"ano":"1ª SÉRIE","comp":"QUI","turma":"1ªV01-EM-MCN","pct_medio":47,"avaliados":"17","previstos":"18","descritores":{"D102_CN":47,"D104_CN":71,"D107_CN":71,"D109_CN":0}},{"ano":"1ª SÉRIE","comp":"QUI","turma":"1ªV02-EM-MCN","pct_medio":52,"avaliados":"16","previstos":"18","descritores":{"D102_CN":56,"D104_CN":81,"D107_CN":44,"D109_CN":25}},{"ano":"1ª SÉRIE","comp":"BIO","turma":"1ªIM01-EMI-IPI","pct_medio":54,"avaliados":"35","previstos":"35","descritores":{"D042_B":97,"D155_CN":80,"D158_CN":23,"D186_B":17}},{"ano":"1ª SÉRIE","comp":"FIS","turma":"1ªIM01-EMI-IPI","pct_medio":80,"avaliados":"35","previstos":"35","descritores":{"D044_CN":80,"D045_CN":71,"D054_CN":94,"D056_CN":74}},{"ano":"1ª SÉRIE","comp":"GEO","turma":"1ªIM01-EMI-IPI","pct_medio":42,"avaliados":"35","previstos":"35","descritores":{"D006_G":60,"D027_G":14,"D052_G":40,"D062_G":54}},{"ano":"1ª SÉRIE","comp":"HIS","turma":"1ªIM01-EMI-IPI","pct_medio":49,"avaliados":"35","previstos":"35","descritores":{"D001_H":77,"D058_H":49,"D245_H":31,"D246_H":40}},{"ano":"2ª SÉRIE","comp":"BIO","turma":"2ªIM01-EM-MCN","pct_medio":52,"avaliados":"32","previstos":"33","descritores":{"D007_CN":50,"D042_B":78,"D161_CN":25,"D182_B":53}},{"ano":"2ª SÉRIE","comp":"BIO","turma":"2ªIM01-EMI-IPI","pct_medio":68,"avaliados":"36","previstos":"36","descritores":{"D007_CN":78,"D042_B":100,"D161_CN":36,"D182_B":58}},{"ano":"2ª SÉRIE","comp":"BIO","turma":"2ªV01-EM-MCN","pct_medio":41,"avaliados":"24","previstos":"28","descritores":{"D007_CN":25,"D042_B":54,"D161_CN":50,"D182_B":33}},{"ano":"2ª SÉRIE","comp":"FIS","turma":"2ªIM01-EM-MCN","pct_medio":40,"avaliados":"32","previstos":"33","descritores":{"D051_CN":41,"D074_F":34,"D097_F":13,"D194_F":72}},{"ano":"2ª SÉRIE","comp":"FIS","turma":"2ªIM01-EMI-IPI","pct_medio":53,"avaliados":"36","previstos":"36","descritores":{"D051_CN":53,"D074_F":28,"D097_F":50,"D194_F":81}},{"ano":"2ª SÉRIE","comp":"FIS","turma":"2ªV01-EM-MCN","pct_medio":40,"avaliados":"24","previstos":"28","descritores":{"D051_CN":42,"D074_F":29,"D097_F":17,"D194_F":71}},{"ano":"2ª SÉRIE","comp":"GEO","turma":"2ªIM01-EM-MCN","pct_medio":52,"avaliados":"32","previstos":"33","descritores":{"D006_G":53,"D037_G":78,"D052_G":47,"D157_G":31}},{"ano":"2ª SÉRIE","comp":"GEO","turma":"2ªIM01-EMI-IPI","pct_medio":62,"avaliados":"36","previstos":"36","descritores":{"D006_G":44,"D037_G":94,"D052_G":67,"D157_G":42}},{"ano":"2ª SÉRIE","comp":"GEO","turma":"2ªV01-EM-MCN","pct_medio":55,"avaliados":"24","previstos":"28","descritores":{"D006_G":63,"D037_G":88,"D052_G":54,"D157_G":17}},{"ano":"2ª SÉRIE","comp":"HIS","turma":"2ªIM01-EM-MCN","pct_medio":61,"avaliados":"32","previstos":"33","descritores":{"D001_H":69,"D058_H":81,"D248_H":38,"D256_H":60}},{"ano":"2ª SÉRIE","comp":"HIS","turma":"2ªIM01-EMI-IPI","pct_medio":74,"avaliados":"36","previstos":"36","descritores":{"D001_H":67,"D058_H":86,"D248_H":61,"D256_H":83}},{"ano":"2ª SÉRIE","comp":"HIS","turma":"2ªV01-EM-MCN","pct_medio":48,"avaliados":"24","previstos":"28","descritores":{"D001_H":29,"D058_H":71,"D248_H":29,"D256_H":63}},{"ano":"2ª SÉRIE","comp":"LP","turma":"2ªIM01-EM-MCN","pct_medio":54,"avaliados":"32","previstos":"35","descritores":{"D017_P":73,"D023_P":50,"D037_P":54,"D039_P":43,"D055_P":53}},{"ano":"2ª SÉRIE","comp":"LP","turma":"2ªIM01-EMI-IPI","pct_medio":87,"avaliados":"36","previstos":"36","descritores":{"D017_P":97,"D023_P":94,"D037_P":86,"D039_P":89,"D055_P":75}},{"ano":"2ª SÉRIE","comp":"LP","turma":"2ªV01-EM-MCN","pct_medio":41,"avaliados":"22","previstos":"26","descritores":{"D017_P":60,"D023_P":24,"D037_P":46,"D039_P":38,"D055_P":38}},{"ano":"2ª SÉRIE","comp":"MT","turma":"2ªIM01-EM-MCN","pct_medio":31,"avaliados":"30","previstos":"35","descritores":{"D010_M":23,"D029_M":35,"D036_M":31}},{"ano":"2ª SÉRIE","comp":"MT","turma":"2ªIM01-EMI-IPI","pct_medio":46,"avaliados":"36","previstos":"36","descritores":{"D010_M":36,"D029_M":49,"D036_M":50}},{"ano":"2ª SÉRIE","comp":"MT","turma":"2ªV01-EM-MCN","pct_medio":26,"avaliados":"23","previstos":"26","descritores":{"D010_M":23,"D029_M":21,"D036_M":33}},{"ano":"2ª SÉRIE","comp":"QUI","turma":"2ªIM01-EM-MCN","pct_medio":26,"avaliados":"32","previstos":"33","descritores":{"D102_CN":22,"D108_CN":13,"D193_Q":56}},{"ano":"2ª SÉRIE","comp":"QUI","turma":"2ªIM01-EMI-IPI","pct_medio":24,"avaliados":"36","previstos":"36","descritores":{"D102_CN":6,"D108_CN":22,"D193_Q":47}},{"ano":"2ª SÉRIE","comp":"QUI","turma":"2ªV01-EM-MCN","pct_medio":21,"avaliados":"24","previstos":"28","descritores":{"D102_CN":25,"D108_CN":19,"D193_Q":21}},{"ano":"3ª SÉRIE","comp":"BIO","turma":"3ªIM01-EM-ENE","pct_medio":24,"avaliados":"17","previstos":"18","descritores":{"D004_CN":29,"D011_CN":18,"D014_CN":41,"D022_B":6}},{"ano":"3ª SÉRIE","comp":"BIO","turma":"3ªIM01-EMI-IPI","pct_medio":41,"avaliados":"33","previstos":"34","descritores":{"D004_CN":52,"D011_CN":42,"D014_CN":55,"D022_B":15}},{"ano":"3ª SÉRIE","comp":"BIO","turma":"3ªV01-EM-ENE","pct_medio":25,"avaliados":"19","previstos":"22","descritores":{"D004_CN":5,"D011_CN":37,"D014_CN":37,"D022_B":21}},{"ano":"3ª SÉRIE","comp":"BIO","turma":"3ªV02-EM-MID","pct_medio":26,"avaliados":"20","previstos":"23","descritores":{"D004_CN":25,"D011_CN":40,"D014_CN":25,"D022_B":15}},{"ano":"3ª SÉRIE","comp":"FIS","turma":"3ªIM01-EM-ENE","pct_medio":32,"avaliados":"17","previstos":"18","descritores":{"D056_CN":41,"D061_CN":18,"D111_CN":24,"D199_F":47}},{"ano":"3ª SÉRIE","comp":"FIS","turma":"3ªIM01-EMI-IPI","pct_medio":48,"avaliados":"33","previstos":"34","descritores":{"D056_CN":42,"D061_CN":48,"D111_CN":45,"D199_F":58}},{"ano":"3ª SÉRIE","comp":"FIS","turma":"3ªV01-EM-ENE","pct_medio":39,"avaliados":"19","previstos":"22","descritores":{"D056_CN":42,"D061_CN":42,"D111_CN":26,"D199_F":47}},{"ano":"3ª SÉRIE","comp":"FIS","turma":"3ªV02-EM-MID","pct_medio":21,"avaliados":"20","previstos":"23","descritores":{"D056_CN":30,"D061_CN":5,"D111_CN":25,"D199_F":25}},{"ano":"3ª SÉRIE","comp":"GEO","turma":"3ªIM01-EM-ENE","pct_medio":51,"avaliados":"17","previstos":"18","descritores":{"D006_G":53,"D073_G":53,"D109_G":53,"D113_G":47}},{"ano":"3ª SÉRIE","comp":"GEO","turma":"3ªIM01-EMI-IPI","pct_medio":64,"avaliados":"33","previstos":"34","descritores":{"D006_G":58,"D073_G":70,"D109_G":58,"D113_G":70}},{"ano":"3ª SÉRIE","comp":"GEO","turma":"3ªV01-EM-ENE","pct_medio":46,"avaliados":"19","previstos":"22","descritores":{"D006_G":47,"D073_G":53,"D109_G":37,"D113_G":47}},{"ano":"3ª SÉRIE","comp":"GEO","turma":"3ªV02-EM-MID","pct_medio":31,"avaliados":"20","previstos":"23","descritores":{"D006_G":25,"D073_G":40,"D109_G":35,"D113_G":25}},{"ano":"3ª SÉRIE","comp":"HIS","turma":"3ªIM01-EM-ENE","pct_medio":38,"avaliados":"17","previstos":"18","descritores":{"D002_H":47,"D237_H":59,"D240_H":18,"D251_H":29}},{"ano":"3ª SÉRIE","comp":"HIS","turma":"3ªIM01-EMI-IPI","pct_medio":59,"avaliados":"33","previstos":"34","descritores":{"D002_H":76,"D237_H":79,"D240_H":52,"D251_H":30}},{"ano":"3ª SÉRIE","comp":"HIS","turma":"3ªV01-EM-ENE","pct_medio":42,"avaliados":"19","previstos":"22","descritores":{"D002_H":58,"D237_H":68,"D240_H":22,"D251_H":21}},{"ano":"3ª SÉRIE","comp":"HIS","turma":"3ªV02-EM-MID","pct_medio":35,"avaliados":"20","previstos":"23","descritores":{"D002_H":40,"D237_H":60,"D240_H":25,"D251_H":15}},{"ano":"3ª SÉRIE","comp":"LP","turma":"3ªIM01-EM-ENE","pct_medio":78,"avaliados":"17","previstos":"19","descritores":{"D017_P":86,"D023_P":81,"D053_P":74,"D055_P":84,"D061_P":66}},{"ano":"3ª SÉRIE","comp":"LP","turma":"3ªIM01-EMI-IPI","pct_medio":85,"avaliados":"32","previstos":"34","descritores":{"D017_P":94,"D023_P":86,"D053_P":81,"D055_P":88,"D061_P":78}},{"ano":"3ª SÉRIE","comp":"LP","turma":"3ªV01-EM-ENE","pct_medio":78,"avaliados":"20","previstos":"22","descritores":{"D017_P":80,"D023_P":76,"D053_P":83,"D055_P":76,"D061_P":78}},{"ano":"3ª SÉRIE","comp":"LP","turma":"3ªV02-EM-MID","pct_medio":58,"avaliados":"17","previstos":"22","descritores":{"D017_P":56,"D023_P":53,"D053_P":62,"D055_P":66,"D061_P":53}},{"ano":"3ª SÉRIE","comp":"MT","turma":"3ªIM01-EM-ENE","pct_medio":42,"avaliados":"16","previstos":"19","descritores":{"D011_M":43,"D042_M":41}},{"ano":"3ª SÉRIE","comp":"MT","turma":"3ªIM01-EMI-IPI","pct_medio":62,"avaliados":"33","previstos":"34","descritores":{"D011_M":73,"D042_M":53}},{"ano":"3ª SÉRIE","comp":"MT","turma":"3ªV01-EM-ENE","pct_medio":55,"avaliados":"20","previstos":"22","descritores":{"D011_M":71,"D042_M":38}},{"ano":"3ª SÉRIE","comp":"MT","turma":"3ªV02-EM-MID","pct_medio":38,"avaliados":"20","previstos":"22","descritores":{"D011_M":38,"D042_M":37}},{"ano":"3ª SÉRIE","comp":"QUI","turma":"3ªIM01-EM-ENE","pct_medio":28,"avaliados":"17","previstos":"18","descritores":{"D107_CN":12,"D120_Q":24,"D136_Q":35,"D200_Q":41}},{"ano":"3ª SÉRIE","comp":"QUI","turma":"3ªIM01-EMI-IPI","pct_medio":35,"avaliados":"33","previstos":"34","descritores":{"D107_CN":30,"D120_Q":42,"D136_Q":33,"D200_Q":33}},{"ano":"3ª SÉRIE","comp":"QUI","turma":"3ªV01-EM-ENE","pct_medio":38,"avaliados":"19","previstos":"22","descritores":{"D107_CN":26,"D120_Q":32,"D136_Q":58,"D200_Q":37}},{"ano":"3ª SÉRIE","comp":"QUI","turma":"3ªV02-EM-MID","pct_medio":35,"avaliados":"20","previstos":"23","descritores":{"D107_CN":45,"D120_Q":30,"D136_Q":35,"D200_Q":30}},{"ano":"8º ANO","comp":"LP","turma":"8ºIM01-EF","pct_medio":68,"avaliados":"34","previstos":"35","descritores":{"D017_P":68,"D025_P":74,"D032_P":68,"D038_P":58,"D057_P":69,"D102_P":69}},{"ano":"8º ANO","comp":"LP","turma":"8ºIM02-EF","pct_medio":64,"avaliados":"31","previstos":"36","descritores":{"D017_P":58,"D025_P":72,"D032_P":69,"D038_P":58,"D057_P":61,"D102_P":68}},{"ano":"8º ANO","comp":"MT","turma":"8ºIM01-EF","pct_medio":36,"avaliados":"34","previstos":"35","descritores":{"D018_M":46,"D038_M":45,"D042_M":24,"D058_M":43,"D063_M":20}},{"ano":"8º ANO","comp":"MT","turma":"8ºIM02-EF","pct_medio":36,"avaliados":"33","previstos":"36","descritores":{"D018_M":45,"D038_M":32,"D042_M":30,"D058_M":42,"D063_M":30}},{"ano":"9º ANO","comp":"LP","turma":"9ºIM01-EF","pct_medio":66,"avaliados":"35","previstos":"35","descritores":{"D017_P":83,"D022_P":54,"D037_P":76,"D055_P":76,"D060_P":77,"D102_P":80}},{"ano":"9º ANO","comp":"LP","turma":"9ºIM02-EF","pct_medio":44,"avaliados":"24","previstos":"24","descritores":{"D017_P":60,"D022_P":39,"D037_P":48,"D055_P":63,"D060_P":58,"D102_P":58}},{"ano":"9º ANO","comp":"LP","turma":"9ºIM03-EF","pct_medio":51,"avaliados":"22","previstos":"25","descritores":{"D017_P":56,"D022_P":38,"D037_P":55,"D055_P":70,"D060_P":75,"D102_P":59}},{"ano":"9º ANO","comp":"MT","turma":"9ºIM01-EF","pct_medio":53,"avaliados":"35","previstos":"35","descritores":{"D009_M":67,"D030_M":38,"D038_M":35,"D039_M":50,"D058_M":61,"D063_M":59}},{"ano":"9º ANO","comp":"MT","turma":"9ºIM02-EF","pct_medio":32,"avaliados":"23","previstos":"24","descritores":{"D009_M":31,"D030_M":30,"D038_M":24,"D039_M":34,"D058_M":47,"D063_M":25}},{"ano":"9º ANO","comp":"MT","turma":"9ºIM03-EF","pct_medio":38,"avaliados":"22","previstos":"25","descritores":{"D009_M":45,"D030_M":34,"D038_M":20,"D039_M":36,"D058_M":45,"D063_M":41}}];
+const COMP_NAMES={LP:'Língua Portuguesa',MT:'Matemática',CN:'Ciências',GEO:'Geografia',HIS:'História',BIO:'Biologia',FIS:'Física',QUI:'Química'};
+const ANO_ORDER=['6º ANO','7º ANO','8º ANO','9º ANO','1ª SÉRIE','2ª SÉRIE','3ª SÉRIE'];
+
+function cellBg(v){if(v==null)return'#e0e0e0';if(v<40)return'#f9b8b0';if(v<60)return'#fce3b4';if(v<75)return'#c5e8cd';return'#8dd4a8'}
+function cellFg(v){if(v==null)return'#999';if(v<40)return'#922b21';if(v<60)return'#784212';if(v<75)return'#1e5631';return'#0d3b22'}
+function barClr(v){if(v<40)return'#e74c3c';if(v<60)return'#e67e22';if(v<75)return'#27ae60';return'#1a7a4a'}
+
+function getFiltered(){
+  const ano=document.getElementById('fano').value;
+  const comp=document.getElementById('fcomp').value;
+  const fil=document.getElementById('ffiltro').value;
+  const srt=document.getElementById('fsort').value;
+  let d=DATA.filter(r=>(!ano||r.ano===ano)&&(!comp||r.comp===comp)&&(fil==='all'||(fil==='below60'&&r.pct_medio<60)||(fil==='above60'&&r.pct_medio>=60)));
+  if(srt==='turma')d.sort((a,b)=>a.turma.localeCompare(b.turma));
+  else if(srt==='asc')d.sort((a,b)=>a.pct_medio-b.pct_medio);
+  else d.sort((a,b)=>b.pct_medio-a.pct_medio);
+  return d;
+}
+
+function populateFilters(){
+  const anos=[...new Set(DATA.map(d=>d.ano))].sort((a,b)=>ANO_ORDER.indexOf(a)-ANO_ORDER.indexOf(b));
+  const comps=[...new Set(DATA.map(d=>d.comp))].sort();
+  const sa=document.getElementById('fano');
+  anos.forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;sa.appendChild(o)});
+  const sc=document.getElementById('fcomp');
+  comps.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c+' — '+(COMP_NAMES[c]||c);sc.appendChild(o)});
+}
+
+function renderSummary(data){
+  const total=data.length;
+  const b60=data.filter(d=>d.pct_medio<60).length;
+  const a75=data.filter(d=>d.pct_medio>=75).length;
+  const avg=total?Math.round(data.reduce((s,d)=>s+d.pct_medio,0)/total):0;
+  document.getElementById('summ').innerHTML=
+    `<div class="card"><div class="card-val">${total}</div><div class="card-lbl">Turmas exibidas</div></div>
+     <div class="card mid"><div class="card-val">${avg}%</div><div class="card-lbl">% Médio geral</div></div>
+     <div class="card warn"><div class="card-val">${b60}</div><div class="card-lbl">Turmas abaixo de 60%</div></div>
+     <div class="card ok"><div class="card-val">${a75}</div><div class="card-lbl">Turmas com 75%+</div></div>`;
+}
+
+function renderHeatmap(data){
+  if(!data.length){document.getElementById('vheat').innerHTML='<div class="empty">Nenhuma turma encontrada.</div>';return}
+  const keys=[];const seen=new Set();
+  data.forEach(d=>Object.keys(d.descritores).forEach(k=>{if(!seen.has(k)){seen.add(k);keys.push(k)}}));
+  const multi=[...new Set(data.map(d=>d.ano+d.comp))].length>1;
+  let h=`<table><thead><tr><th class="left">Turma</th>`;
+  if(multi)h+=`<th>Série</th><th>Disciplina</th>`;
+  h+=`<th>% Médio</th><th>Avaliados</th>`;
+  keys.forEach(k=>h+=`<th>${k}</th>`);
+  h+=`</tr></thead><tbody>`;
+  data.forEach(d=>{
+    h+=`<tr><td class="left">${d.turma}</td>`;
+    if(multi)h+=`<td style="font-size:11px;white-space:nowrap">${d.ano}</td><td style="font-weight:700">${d.comp}</td>`;
+    const bc=barClr(d.pct_medio);
+    h+=`<td style="min-width:115px"><div class="bar-outer"><div class="bar-inner" style="width:${d.pct_medio}%;background:${bc}"></div><span class="bar-label">${d.pct_medio}%</span></div></td>
+        <td style="font-size:11px;color:#777">${d.avaliados}/${d.previstos}</td>`;
+    keys.forEach(k=>{const v=d.descritores[k];h+=`<td style="background:${cellBg(v)};color:${cellFg(v)}">${v!=null?v+'%':'—'}</td>`});
+    h+=`</tr>`;
+  });
+  h+=`</tbody></table>`;
+  document.getElementById('vheat').innerHTML=h;
+}
+
+function renderRanking(data){
+  if(!data.length){document.getElementById('vrank').innerHTML='<div class="empty">Nenhuma turma encontrada.</div>';return}
+  const sorted=[...data].sort((a,b)=>b.pct_medio-a.pct_medio);
+  let h='<div class="ranking">';
+  sorted.forEach((d,i)=>{
+    const bc=barClr(d.pct_medio);
+    h+=`<div class="rrow">
+      <div class="rnum ${i<3?'top':''}">${i+1}º</div>
+      <div class="rinfo"><div class="rturma">${d.turma}</div><div class="rsub">${d.ano} · ${COMP_NAMES[d.comp]||d.comp} · ${d.avaliados} avaliados</div></div>
+      <div class="rbar"><div class="bar-outer" style="height:20px"><div class="bar-inner" style="width:${d.pct_medio}%;background:${bc}"></div><span class="bar-label" style="top:2px">${d.pct_medio}%</span></div></div>
+    </div>`;
+  });
+  h+='</div>';
+  document.getElementById('vrank').innerHTML=h;
+}
+
+function renderDesc(data){
+  if(!data.length){document.getElementById('vdesc').innerHTML='<div class="empty">Nenhuma turma encontrada.</div>';return}
+  const byD={};
+  data.forEach(d=>Object.entries(d.descritores).forEach(([k,v])=>{
+    if(v==null)return;
+    if(!byD[k])byD[k]=[];
+    byD[k].push({turma:d.turma,ano:d.ano,comp:d.comp,v});
+  }));
+  let h='<div class="dgrid">';
+  Object.entries(byD).sort().forEach(([code,rows])=>{
+    const avg=Math.round(rows.reduce((s,r)=>s+r.v,0)/rows.length);
+    h+=`<div class="dcard"><div class="dcode">${code}</div>
+      <div style="font-size:10px;color:var(--muted);margin:2px 0 6px">Média: <strong style="color:${cellFg(avg)};background:${cellBg(avg)};padding:1px 5px;border-radius:3px">${avg}%</strong></div>
+      <div class="dbars">`;
+    rows.sort((a,b)=>b.v-a.v).forEach(r=>{
+      h+=`<div class="drow"><div class="dname" title="${r.turma}">${r.turma}</div>
+        <div class="dtrack"><div class="dfill" style="width:${r.v}%;background:${barClr(r.v)}"></div></div>
+        <div class="dval" style="color:${cellFg(r.v)}">${r.v}%</div></div>`;
+    });
+    h+=`</div></div>`;
+  });
+  h+='</div>';
+  document.getElementById('vdesc').innerHTML=h;
+}
+
+let curView='heatmap';
+function renderAll(){
+  const data=getFiltered();
+  renderSummary(data);
+  if(curView==='heatmap')renderHeatmap(data);
+  else if(curView==='ranking')renderRanking(data);
+  else renderDesc(data);
+}
+
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    curView=t.dataset.v;
+    ['vheat','vrank','vdesc'].forEach(id=>document.getElementById(id).classList.toggle('hidden',id!=='v'+curView));
+    renderAll();
+  });
+});
+['fano','fcomp','ffiltro','fsort'].forEach(id=>document.getElementById(id).addEventListener('change',renderAll));
+
+populateFilters();
+renderAll();
+</script></body></html>
